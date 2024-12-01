@@ -1,59 +1,68 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraSwitchBehaviour : MonoBehaviour
 {
-    public Camera mainCamera; // Reference to the main camera
-    private Camera currentCamera; // Reference to the current active camera
-    private Camera previousCamera; // Reference to the previous camera
+    public GameObject LockOnObject;
+    public Camera[] cameras;
+    public int currentCameraIndex = 0;
+    public Vector3 lockOnOffset; // Offset for the camera lock-on
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private MainThirdPersonCamera thirdPersonCamera;
+
     void Start()
     {
-        // Ensure all cameras are turned off except the main camera
-        Camera[] allCameras = Camera.allCameras;
-        foreach (Camera cam in allCameras)
-        {
-            if (cam != mainCamera)
-            {
-                cam.gameObject.SetActive(false);
-            }
-        }
-
-        // Set the main camera as the current camera
-        currentCamera = mainCamera;
-        currentCamera.gameObject.SetActive(true);
+        SetActiveCamera(currentCameraIndex);
+        thirdPersonCamera = gameObject.AddComponent<MainThirdPersonCamera>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        // Optional: Add any additional logic if needed
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        // Check if the collider has a camera attached
-        Camera colliderCamera = other.GetComponentInChildren<Camera>();
-        if (colliderCamera != null)
+        if (LockOnObject != null)
         {
-            // Switch to the collider's camera
-            previousCamera = currentCamera;
-            currentCamera.gameObject.SetActive(false);
-            currentCamera = colliderCamera;
-            currentCamera.gameObject.SetActive(true);
+            LockCameraOnPlayer();
         }
     }
 
-    private void OnTriggerExit(Collider other)
+    public void LockCameraOnPlayer()
     {
-        // Check if the collider has a camera attached
-        Camera colliderCamera = other.GetComponentInChildren<Camera>();
-        if (colliderCamera != null && currentCamera == colliderCamera)
+        Vector3 lookAtPosition = LockOnObject.transform.position + lockOnOffset;
+        cameras[currentCameraIndex].transform.LookAt(lookAtPosition);
+    }
+
+    public void SetActiveCamera(int index)
+    {
+        for (int i = 0; i < cameras.Length; i++)
         {
-            // Switch back to the previous camera
-            currentCamera.gameObject.SetActive(false);
-            currentCamera = previousCamera;
-            currentCamera.gameObject.SetActive(true);
+            cameras[i].enabled = (i == index);
+        }
+        currentCameraIndex = index;
+    }
+
+    public int GetCameraIndex(Camera cam)
+    {
+        for (int i = 0; i < cameras.Length; i++)
+        {
+            if (cameras[i] == cam)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public void DisableAllButMain()
+    {
+        if (Camera.main != null)
+        {
+            Camera mainCamera = Camera.main;
+            for (int i = 0; i < cameras.Length; i++)
+            {
+                cameras[i].enabled = false;
+            }
+            mainCamera.enabled = true;
         }
     }
 }
