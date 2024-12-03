@@ -17,7 +17,7 @@ public class EnemyAI : MonoBehaviour
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        animator = GetComponent<Animator>();
+        animator = GetComponentInChildren<Animator>();
         agent.isStopped = true; // Initially stop the agent
         agent.speed = movementSpeed; // Set the movement speed
     }
@@ -46,9 +46,8 @@ public class EnemyAI : MonoBehaviour
         Vector3 directionToPlayer = (player.position - transform.position).normalized;
 
         // Perform a raycast from the zombie's position to the player's position
-        if (Physics.Raycast(transform.position, directionToPlayer, out RaycastHit hit, sightRange, ~obstacleMask))
+        if (Physics.Raycast(transform.position, directionToPlayer, out RaycastHit hit, sightRange, obstacleMask))
         {
-            // Check if the ray hit the player
             if (hit.collider.CompareTag("Player"))
             {
                 return true;
@@ -61,17 +60,43 @@ public class EnemyAI : MonoBehaviour
     void Scream()
     {
         hasScreamed = true;
-        animator.SetTrigger("hasSeenPlayer"); // Trigger the scream animation
         agent.isStopped = true; // Stop movement during scream
+        animator.SetTrigger("hasSeenPlayer"); // Trigger the scream animation
         Debug.Log("Zombie screams!");
     }
 
     void WalkTowardsPlayer()
     {
-        animator.SetBool("isWalking", true); // Activate walk animation
-        agent.isStopped = false; // Allow movement
-        agent.speed = movementSpeed; // Ensure the movement speed is set
-        agent.SetDestination(player.position); // Move towards the player
+        if (player == null)
+            return;
+
+        // Set the player's position as the destination
+        agent.SetDestination(player.position);
+        Debug.Log("Setting destination to player position: " + player.position);
+
+        // Resume movement
+        agent.isStopped = false;
+        Debug.Log("Agent is stopped: " + agent.isStopped);
+
+        // animator.SetBool("isWalking", true); // Activate walk animation
         Debug.Log("Zombie is walking toward the player.");
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (player != null)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(transform.position, player.position); // Draw a line to the player
+        }
+
+        if (agent != null && agent.hasPath)
+        {
+            Gizmos.color = Color.red;
+            foreach (Vector3 corner in agent.path.corners)
+            {
+                Gizmos.DrawSphere(corner, 0.2f); // Visualize path corners
+            }
+        }
     }
 }

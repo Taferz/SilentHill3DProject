@@ -12,13 +12,27 @@ public class MainThirdPersonCamera : MonoBehaviour
 
     private Vector3 offset;
 
+    private void Awake()
+    {
+        if (player == null)
+        {
+            Debug.LogError("Player transform is not assigned in Awake.");
+        }
+        else
+        {
+            Debug.Log("Player transform assigned in Awake: " + player.name);
+        }
+    }
+
     private void Start()
     {
         if (player == null)
         {
-            Debug.LogError("Player transform is not assigned.");
+            Debug.LogError("Player transform is not assigned in Start.");
             return;
         }
+
+        Debug.Log("Player transform assigned in Start: " + player.name);
 
         offset = new Vector3(0, height, -distance);
     }
