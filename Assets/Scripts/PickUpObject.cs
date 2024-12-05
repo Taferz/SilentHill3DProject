@@ -7,6 +7,12 @@ public class PickUpObject : MonoBehaviour
     public GameObject myHands; // Reference to your hands/the position where you want your object to go
     public GameObject handPosition; // Reference to the hidden object in the hand
     public GameObject objectIWantToPickUp; // The GameObject you want to pick up, referenced in the Inspector
+    public Material highlightMaterial1; // Reference to the first highlight material
+    public Material highlightMaterial2; // Reference to the second highlight material
+    private Material originalMaterial1; // Reference to the first original material of the object
+    private Material originalMaterial2; // Reference to the second original material of the child object
+    private Renderer parentRenderer; // Reference to the Renderer component of the parent object
+    private Renderer childRenderer; // Reference to the Renderer component of the child object
     private bool canPickup; // A bool to see if you can or can't pick up the item
     private bool hasItem; // A bool to see if you have an item in your hand
     private Animator animator; // Reference to the Animator component
@@ -19,6 +25,24 @@ public class PickUpObject : MonoBehaviour
         if (animator == null)
         {
             Debug.LogError("Animator component is not assigned.");
+        }
+
+        if (objectIWantToPickUp != null)
+        {
+            parentRenderer = objectIWantToPickUp.GetComponent<Renderer>();
+            if (parentRenderer != null)
+            {
+                originalMaterial1 = parentRenderer.material; // Get the first original material of the parent object
+            }
+
+            if (objectIWantToPickUp.transform.childCount > 0)
+            {
+                childRenderer = objectIWantToPickUp.transform.GetChild(0).GetComponent<Renderer>();
+                if (childRenderer != null)
+                {
+                    originalMaterial2 = childRenderer.material; // Get the first original material of the child object
+                }
+            }
         }
     }
 
@@ -53,6 +77,7 @@ public class PickUpObject : MonoBehaviour
         Debug.Log("Picked up the object: " + objectIWantToPickUp.name);
         Debug.Log("Object position: " + objectIWantToPickUp.transform.position);
         Debug.Log("Object parent: " + objectIWantToPickUp.transform.parent.name);
+        HighlightObject(false); // Ensure the object uses the original materials after being picked up
     }
 
     private void OnTriggerEnter(Collider other) // To see when the player enters the collider
@@ -61,6 +86,7 @@ public class PickUpObject : MonoBehaviour
         {
             canPickup = true; // Set the pickup bool to true
             Debug.Log("Entered trigger with object: " + objectIWantToPickUp.name);
+            HighlightObject(true); // Highlight the object
         }
     }
 
@@ -70,8 +96,26 @@ public class PickUpObject : MonoBehaviour
         {
             canPickup = false; // When you leave the collider, set the canPickup bool to false
             Debug.Log("Exited trigger with object");
+            HighlightObject(false); // Remove the highlight from the object
         }
     }
+
+    private void HighlightObject(bool highlight)
+    {
+        if (objectIWantToPickUp != null)
+        {
+            if (parentRenderer != null)
+            {
+                parentRenderer.material = (highlight && !hasItem) ? highlightMaterial1 : originalMaterial1; // Change the material of the parent object based on the highlight flag
+            }
+
+            if (childRenderer != null)
+            {
+                childRenderer.material = (highlight && !hasItem) ? highlightMaterial2 : originalMaterial2; // Change the material of the child object based on the highlight flag
+            }
+        }
+    }
+
     public bool HasItem()
     {
         return hasItem;
