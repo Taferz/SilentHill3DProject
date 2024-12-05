@@ -72,4 +72,8 @@ public class PickUpObject : MonoBehaviour
             Debug.Log("Exited trigger with object");
         }
     }
+    public bool HasItem()
+    {
+        return hasItem;
+    }
 }

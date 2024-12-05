@@ -1,11 +1,15 @@
 using UnityEngine;
 
-public class Movement : MonoBehaviour
+public class PlayerMovementAndBehaviour : MonoBehaviour
 {
     public float moveSpeed = 5.0f; // Speed of forward and backward movement
     public float runSpeed = 10.0f; // Speed of running
     public float turnSpeed = 100.0f; // Speed of turning
+    public int weaponDamage = 50; // Damage dealt by the weapon
     private Animator animator; // Reference to the Animator component
+    private PickUpObject pickUpObject; // Reference to the PickUpObject component
+    private HealthSystem healthSystem; // Reference to the HealthSystem component
+    private bool hasPickedUpItem = false; // Track if the item has been picked up
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -14,6 +18,12 @@ public class Movement : MonoBehaviour
         if (animator == null)
         {
             Debug.LogError("Animator component is not assigned.");
+        }
+
+        pickUpObject = GetComponent<PickUpObject>();
+        if (pickUpObject == null)
+        {
+            Debug.LogError("PickUpObject component is not assigned.");
         }
     }
 
@@ -62,6 +72,18 @@ public class Movement : MonoBehaviour
             isTurningRight = true;
         }
 
+        // Check if the item has been picked up
+        if (pickUpObject != null && pickUpObject.HasItem())
+        {
+            hasPickedUpItem = true;
+        }
+
+        // Shoot
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Shoot();
+        }
+
         // Update the animator with the walking, running, walking backward, and turning states
         if (animator != null)
         {
@@ -70,6 +92,28 @@ public class Movement : MonoBehaviour
             animator.SetBool("isWalkingBackward", isWalkingBackward);
             animator.SetBool("isTurningLeft", isTurningLeft);
             animator.SetBool("isTurningRight", isTurningRight);
+        }
+    }
+
+    void Shoot()
+    {
+        if (hasPickedUpItem)
+        {
+            // Trigger the shoot animation
+            if (animator != null)
+            {
+                animator.SetTrigger("Shoot");
+            }
+
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position, transform.forward, out hit))
+            {
+                HealthSystem targetHealth = hit.transform.GetComponent<HealthSystem>();
+                if (targetHealth != null)
+                {
+                    targetHealth.TakeDamage(weaponDamage); // Apply damage
+                }
+            }
         }
     }
 }

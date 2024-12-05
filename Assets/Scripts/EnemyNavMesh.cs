@@ -6,6 +6,7 @@ public class EnemyNavMesh : MonoBehaviour
     public Transform player; // Reference to the player's Transform
     private NavMeshAgent agent; // NavMeshAgent for movement
     private Animator animator; // Animator for controlling animations
+    private HealthSystem healthSystem; // Reference to the HealthSystem component
 
     public float sightRange = 10.0f; // Distance at which the agent sees the player
     public float attackRange = 2.0f; // Distance at which the agent attacks the player
@@ -13,6 +14,7 @@ public class EnemyNavMesh : MonoBehaviour
 
     private float screamTimer = 0f; // Timer for scream duration
     private bool isScreaming = false; // Track if the agent is screaming
+    private bool isDead = false; // Track if the agent is dead
 
     void Start()
     {
@@ -25,7 +27,7 @@ public class EnemyNavMesh : MonoBehaviour
 
     void Update()
     {
-        if (player == null) return;
+        if (player == null || isDead) return;
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
