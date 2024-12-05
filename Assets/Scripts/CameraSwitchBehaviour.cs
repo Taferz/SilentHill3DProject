@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,12 +9,11 @@ public class CameraSwitchBehaviour : MonoBehaviour
     public int currentCameraIndex = 0;
     public Vector3 lockOnOffset; // Offset for the camera lock-on
 
-    private MainThirdPersonCamera thirdPersonCamera;
+    public MainThirdPersonCamera thirdPersonCamera; // Reference to the third-person camera script
 
     void Start()
     {
         SetActiveCamera(currentCameraIndex);
-        thirdPersonCamera = gameObject.AddComponent<MainThirdPersonCamera>();
     }
 
     void Update()
@@ -36,7 +34,13 @@ public class CameraSwitchBehaviour : MonoBehaviour
     {
         for (int i = 0; i < cameras.Length; i++)
         {
-            cameras[i].enabled = (i == index);
+            bool isActive = (i == index);
+            cameras[i].enabled = isActive;
+            AudioListener audioListener = cameras[i].GetComponent<AudioListener>();
+            if (audioListener != null)
+            {
+                audioListener.enabled = isActive;
+            }
         }
         currentCameraIndex = index;
     }
@@ -55,14 +59,29 @@ public class CameraSwitchBehaviour : MonoBehaviour
 
     public void DisableAllButMain()
     {
-        if (Camera.main != null)
+        for (int i = 0; i < cameras.Length; i++)
         {
-            Camera mainCamera = Camera.main;
-            for (int i = 0; i < cameras.Length; i++)
+            cameras[i].enabled = false;
+            AudioListener audioListener = cameras[i].GetComponent<AudioListener>();
+            if (audioListener != null)
             {
-                cameras[i].enabled = false;
+                audioListener.enabled = false;
             }
-            mainCamera.enabled = true;
+        }
+
+        if (thirdPersonCamera != null)
+        {
+            thirdPersonCamera.enabled = true;
+            Camera mainCamera = thirdPersonCamera.GetComponent<Camera>();
+            if (mainCamera != null)
+            {
+                mainCamera.enabled = true;
+                AudioListener mainAudioListener = mainCamera.GetComponent<AudioListener>();
+                if (mainAudioListener != null)
+                {
+                    mainAudioListener.enabled = true;
+                }
+            }
         }
     }
 }
