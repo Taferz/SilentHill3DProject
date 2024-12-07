@@ -8,7 +8,7 @@ public class PlayerMovementAndBehaviour : MonoBehaviour
     public int weaponDamage = 50; // Damage dealt by the weapon
     private Animator animator; // Reference to the Animator component
     private PickUpObject pickUpObject; // Reference to the PickUpObject component
-    private HealthSystem healthSystem; // Reference to the HealthSystem component
+    private ZombieDeath zombieDeath; // Reference to the HealthSystem component
     private bool hasPickedUpItem = false; // Track if the item has been picked up
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -108,7 +108,7 @@ public class PlayerMovementAndBehaviour : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(transform.position, transform.forward, out hit))
             {
-                HealthSystem targetHealth = hit.transform.GetComponent<HealthSystem>();
+                ZombieDeath targetHealth = hit.transform.GetComponent<ZombieDeath>();
                 if (targetHealth != null)
                 {
                     targetHealth.TakeDamage(weaponDamage); // Apply damage

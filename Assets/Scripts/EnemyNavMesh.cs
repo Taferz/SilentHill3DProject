@@ -6,7 +6,7 @@ public class EnemyNavMesh : MonoBehaviour
     public Transform player; // Reference to the player's Transform
     private NavMeshAgent agent; // NavMeshAgent for movement
     private Animator animator; // Animator for controlling animations
-    private HealthSystem healthSystem; // Reference to the HealthSystem component
+    private ZombieDeath zombieDeath; // Reference to the HealthSystem component
 
     public float sightRange = 10.0f; // Distance at which the agent sees the player
     public float attackRange = 2.0f; // Distance at which the agent attacks the player
